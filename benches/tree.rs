@@ -1,5 +1,5 @@
 use criterion::{criterion_group, criterion_main, Criterion};
-use lsm_tree::{AbstractTree, BlockCache, Config};
+use lsm_tree::{AbstractTree, Cache, Config};
 use std::sync::Arc;
 use tempfile::tempdir;
 
@@ -12,7 +12,7 @@ fn full_scan(c: &mut Criterion) {
             let path = tempdir().unwrap();
 
             let tree = Config::new(path)
-                .block_cache(BlockCache::with_capacity_bytes(0).into())
+                .use_cache(Cache::with_capacity_bytes(0).into())
                 .open()
                 .unwrap();
 
@@ -33,7 +33,7 @@ fn full_scan(c: &mut Criterion) {
             let path = tempdir().unwrap();
 
             let tree = Config::new(path)
-                .block_cache(BlockCache::with_capacity_bytes(100_000_000).into())
+                .use_cache(Cache::with_capacity_bytes(100_000_000).into())
                 .open()
                 .unwrap();
 
@@ -62,7 +62,7 @@ fn scan_vs_query(c: &mut Criterion) {
         let path = tempdir().unwrap();
 
         let tree = Config::new(path)
-            .block_cache(BlockCache::with_capacity_bytes(0).into())
+            .use_cache(Cache::with_capacity_bytes(0).into())
             .open()
             .unwrap();
 
@@ -132,7 +132,7 @@ fn scan_vs_prefix(c: &mut Criterion) {
         let path = tempdir().unwrap();
 
         let tree = Config::new(path)
-            .block_cache(BlockCache::with_capacity_bytes(0).into())
+            .use_cache(Cache::with_capacity_bytes(0).into())
             .open()
             .unwrap();
 
@@ -188,7 +188,7 @@ fn tree_get_pairs(c: &mut Criterion) {
             let folder = tempfile::tempdir().unwrap();
             let tree = Config::new(folder)
                 .data_block_size(1_024)
-                .block_cache(Arc::new(BlockCache::with_capacity_bytes(0)))
+                .use_cache(Arc::new(Cache::with_capacity_bytes(0)))
                 .open()
                 .unwrap();
 
@@ -226,7 +226,7 @@ fn tree_get_pairs(c: &mut Criterion) {
             let folder = tempfile::tempdir().unwrap();
             let tree = Config::new(folder)
                 .data_block_size(1_024)
-                .block_cache(Arc::new(BlockCache::with_capacity_bytes(0)))
+                .use_cache(Arc::new(Cache::with_capacity_bytes(0)))
                 .open()
                 .unwrap();
 
@@ -269,7 +269,7 @@ fn disk_point_read(c: &mut Criterion) {
 
     let tree = Config::new(folder)
         .data_block_size(1_024)
-        .block_cache(Arc::new(BlockCache::with_capacity_bytes(0)))
+        .use_cache(Arc::new(Cache::with_capacity_bytes(0)))
         .open()
         .unwrap();
 
@@ -307,7 +307,7 @@ fn disjoint_tree_minmax(c: &mut Criterion) {
 
     let tree = Config::new(folder)
         .data_block_size(1_024)
-        .block_cache(Arc::new(BlockCache::with_capacity_bytes(0)))
+        .use_cache(Arc::new(Cache::with_capacity_bytes(0)))
         .open()
         .unwrap();
 
@@ -361,7 +361,7 @@ fn blob_tree_get(c: &mut Criterion) {
     let folder = tempfile::tempdir().unwrap();
 
     let tree = Config::new(folder.path())
-        .block_cache(BlockCache::with_capacity_bytes(0).into())
+        .use_cache(Cache::with_capacity_bytes(0).into())
         .open_as_blob_tree()
         .unwrap();
 

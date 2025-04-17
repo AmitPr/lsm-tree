@@ -1,14 +1,17 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 use lsm_tree::bloom::BloomFilter;
 
 fn filter_construction(c: &mut Criterion) {
     let mut filter = BloomFilter::with_fp_rate(1_000_000, 0.01);
 
     c.bench_function("bloom filter add key", |b| {
-        b.iter(|| {
-            let key = nanoid::nanoid!();
-            filter.set_with_hash(BloomFilter::get_hash(key.as_bytes()));
-        });
+        b.iter_batched(
+            || nanoid::nanoid!(),
+            |key| {
+                filter.set_with_hash(BloomFilter::get_hash(key.as_bytes()));
+            },
+            BatchSize::SmallInput,
+        );
     });
 }
 
@@ -32,13 +35,17 @@ fn filter_contains(c: &mut Criterion) {
                 fpr * 100.0,
             ),
             |b| {
-                b.iter(|| {
-                    use rand::seq::IndexedRandom;
-
-                    let sample = keys.choose(&mut rng).unwrap();
-                    let hash = BloomFilter::get_hash(sample);
-                    assert!(filter.contains_hash(hash));
-                });
+                b.iter_batched(
+                    || {
+                        use rand::seq::IndexedRandom;
+                        let sample = keys.choose(&mut rng).unwrap();
+                        BloomFilter::get_hash(sample)
+                    },
+                    |hash| {
+                        assert!(filter.contains_hash(hash));
+                    },
+                    BatchSize::SmallInput,
+                );
             },
         );
     }
